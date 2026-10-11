@@ -8,12 +8,17 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.3.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\HotelDashboard.Application\HotelDashboard.Application.csproj" />
     <ProjectReference Include="..\HotelDashboard.Infrastructure\HotelDashboard.Infrastructure.csproj" />
+    <ProjectReference Include="..\HotelDashboard.Communication\HotelDashboard.Communication.csproj" />
   </ItemGroup>
 
 </Project>

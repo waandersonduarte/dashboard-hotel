@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/HotelDashboard.Api/HotelDashboard.Api.csproj" />
     <Project Path="src/HotelDashboard.Application/HotelDashboard.Application.csproj" />
+    <Project Path="src/HotelDashboard.Communication/HotelDashboard.Communication.csproj" />
     <Project Path="src/HotelDashboard.Domain/HotelDashboard.Domain.csproj" />
     <Project Path="src/HotelDashboard.Infrastructure/HotelDashboard.Infrastructure.csproj" />
   </Folder>
