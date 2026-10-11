@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\HotelDashboard.Domain\HotelDashboard.Domain.csproj" />
+    <ProjectReference Include="..\HotelDashboard.Communication\HotelDashboard.Communication.csproj" />
   </ItemGroup>
 
   <ItemGroup>
