@@ -1,4 +1,5 @@
 
+using HotelDashboard.Application.Validators.Guest;
 using HotelDashboard.Domain.Repositories;
 using HotelDashboard.Communication.Responses;
 using HotelDashboard.Communication.Requests;
@@ -8,18 +9,18 @@ using Mapster;
 
 namespace HotelDashboard.Application.UseCases.Guest;
 
-public class RegisterGuestUseCase : IRegisterGuestUseCase
+public class GuestUseCase : IGuestUseCase
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IGuestRepository _guestRepository;
 
-    public RegisterGuestUseCase(IUnitOfWork unitOfWork, IGuestRepository guestRepository)
+    public GuestUseCase(IUnitOfWork unitOfWork, IGuestRepository guestRepository)
     {
         _unitOfWork = unitOfWork;
         _guestRepository = guestRepository;
     }
 
-    public async Task<GuestResponse> ExecuteAsync(GuestRequest request)
+    public async Task<GuestResponse> SalvarAsync(GuestRequest request)
     {
         await GuestValidationAsync(request);
 
