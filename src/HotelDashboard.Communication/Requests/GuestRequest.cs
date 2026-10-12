@@ -1,4 +1,4 @@
-namespace HotelDashboard.Api.Contracts.Requests;
+namespace HotelDashboard.Communication.Requests;
 
 public class GuestRequest
 {
