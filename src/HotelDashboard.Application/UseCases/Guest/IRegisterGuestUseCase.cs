@@ -1,4 +1,5 @@
-using HotelDashboard.Api.Contracts.Requests;
+using HotelDashboard.Communication.Requests;
+using HotelDashboard.Communication.Responses;
 
 namespace HotelDashboard.Application.UseCases.Guest;
 

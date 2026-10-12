@@ -5,4 +5,5 @@ namespace HotelDashboard.Domain.Repositories;
 public interface IGuestRepository
 {
     Task AddAsync(Guest guest);
+    Task<bool> ExistByCPF(string cpf);
 }

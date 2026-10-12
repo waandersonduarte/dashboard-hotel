@@ -1,4 +1,5 @@
 using HotelDashboard.Api.Converters;
+using HotelDashboard.Api.Filters;
 using HotelDashboard.Application;
 using HotelDashboard.Infrastructure;
 
@@ -10,6 +11,8 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
+
+builder.Services.AddMvc(options => options.Filters.Add<FilterException>());
 
 var app = builder.Build();
 
