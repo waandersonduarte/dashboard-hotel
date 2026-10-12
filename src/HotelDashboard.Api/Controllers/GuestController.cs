@@ -14,9 +14,9 @@ public class GuestController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Register(
         [FromBody] GuestRequest request, 
-        [FromServices] IRegisterGuestUseCase useCase)
+        [FromServices] IGuestUseCase useCase)
     {
-        var result = await useCase.ExecuteAsync(request);
+        var result = await useCase.SalvarAsync(request);
         return Created(string.Empty, result);
     }
 }

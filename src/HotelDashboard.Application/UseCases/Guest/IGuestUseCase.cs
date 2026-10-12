@@ -3,7 +3,7 @@ using HotelDashboard.Communication.Responses;
 
 namespace HotelDashboard.Application.UseCases.Guest;
 
-public interface IRegisterGuestUseCase
+public interface IGuestUseCase
 {
-    Task<GuestResponse> ExecuteAsync(GuestRequest request);
+    Task<GuestResponse> SalvarAsync(GuestRequest request);
 }
