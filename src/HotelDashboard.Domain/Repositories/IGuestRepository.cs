@@ -6,4 +6,7 @@ public interface IGuestRepository
 {
     Task AddAsync(Guest guest);
     Task<bool> ExistByCPF(string cpf);
+    Task<bool> ExistByEmail(string email);
+    Task<Guest?> GetByCpf(string cpf);
+    Task<List<Guest>> GetAll();
 }
