@@ -29,6 +29,10 @@ namespace HotelDashboard.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
+                    b.Property<bool>("Active")
+                        .HasColumnType("bit")
+                        .HasColumnName("active");
+
                     b.Property<string>("CPF")
                         .IsRequired()
                         .HasMaxLength(11)
