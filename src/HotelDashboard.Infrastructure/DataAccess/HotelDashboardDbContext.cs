@@ -8,6 +8,7 @@ internal class HotelDashboardDbContext : DbContext
     public HotelDashboardDbContext(DbContextOptions<HotelDashboardDbContext> options) : base(options) {}
 
     public DbSet<Guest> Guests { get; set; }
+    public DbSet<Room> Rooms { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

@@ -65,6 +65,41 @@ namespace HotelDashboard.Infrastructure.Migrations
 
                     b.ToTable("guest", (string)null);
                 });
+
+            modelBuilder.Entity("HotelDashboard.Domain.Entities.Room", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<long>("Capacity")
+                        .HasColumnType("bigint")
+                        .HasColumnName("capacity");
+
+                    b.Property<string>("Number")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("number");
+
+                    b.Property<double>("PricePerNight")
+                        .HasColumnType("float")
+                        .HasColumnName("price_per_night");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)")
+                        .HasColumnName("type");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("room", (string)null);
+                });
 #pragma warning restore 612, 618
         }
     }
