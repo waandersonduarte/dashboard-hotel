@@ -3,7 +3,7 @@
 public enum StatusRoomEnum
 {
     Available = 1,
-    Busy = 2,
+    Occupied = 2,
     Cleaning = 3,
     Maintenance = 4,
 }

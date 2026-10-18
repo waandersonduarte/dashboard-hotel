@@ -2,6 +2,7 @@ using HotelDashboard.Api.Converters;
 using HotelDashboard.Api.Filters;
 using HotelDashboard.Application;
 using HotelDashboard.Infrastructure;
+using HotelDashboard.Infrastructure.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,4 +31,12 @@ app.MapControllers();
 
 app.UseHttpsRedirection();
 
+await ExecuteMigrationsAsync();
+
 app.Run();
+
+async Task ExecuteMigrationsAsync()
+{
+    await using var scope = app.Services.CreateAsyncScope();
+    DatabaseMigration.ExecuteMigrations(scope.ServiceProvider);
+}

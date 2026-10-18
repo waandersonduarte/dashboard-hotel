@@ -10,6 +10,11 @@ public class ErrorOnValidationException : HotelDashboardException
         _errorMessages = errorMessages;
     }
 
+    public ErrorOnValidationException(string errorMessage)
+    {
+        _errorMessages = new List<string> { errorMessage };
+    }
+
     public override List<string> GetErrorMessages() => _errorMessages;
 
     public override HttpStatusCode GetStatusCode() => HttpStatusCode.BadRequest;
