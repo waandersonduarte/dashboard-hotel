@@ -21,4 +21,5 @@ internal sealed class RoomRepository : IRoomRepository
     public async Task<int> TotalNumberOfOccupiedRoomsAsync() => await _dbContext.Rooms.CountAsync(r => r.Status == StatusRoomEnum.Occupied);
     public async Task<int> TotalNumberOfRoomsAsync() => await _dbContext.Rooms.CountAsync();
     public async Task<List<Room>> GetAllAsync() => await _dbContext.Rooms.ToListAsync();
+    public async Task<bool> ExistByIdAvailableRoomAsync(Guid id) => await _dbContext.Rooms.AnyAsync(r => r.Id == id && r.Status == StatusRoomEnum.Available);
 }
