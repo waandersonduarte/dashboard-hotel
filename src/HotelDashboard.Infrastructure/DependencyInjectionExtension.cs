@@ -1,4 +1,3 @@
-using System.Reflection;
 using HotelDashboard.Domain.Repositories;
 using HotelDashboard.Infrastructure.DataAccess;
 using HotelDashboard.Infrastructure.DataAccess.Repositories;
@@ -15,6 +14,7 @@ public static class DependencyInjectionExtension
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IGuestRepository, GuestRepository>();
         services.AddScoped<IRoomRepository, RoomRepository>();
+        services.AddScoped<ICheckinRepository, CheckinRepository>();
 
         services.AddDbContext<HotelDashboardDbContext>(options =>
         {
