@@ -22,6 +22,42 @@ namespace HotelDashboard.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("HotelDashboard.Domain.Entities.Checkin", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("DepartureDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("departure_date");
+
+                    b.Property<DateTime?>("EntryDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("entry_date");
+
+                    b.Property<Guid>("IdGuest")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id_guest");
+
+                    b.Property<Guid>("IdRoom")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id_room");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdGuest");
+
+                    b.HasIndex("IdRoom");
+
+                    b.ToTable("checkin", (string)null);
+                });
+
             modelBuilder.Entity("HotelDashboard.Domain.Entities.Guest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -99,6 +135,25 @@ namespace HotelDashboard.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("room", (string)null);
+                });
+
+            modelBuilder.Entity("HotelDashboard.Domain.Entities.Checkin", b =>
+                {
+                    b.HasOne("HotelDashboard.Domain.Entities.Guest", "Guest")
+                        .WithMany()
+                        .HasForeignKey("IdGuest")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("HotelDashboard.Domain.Entities.Room", "Room")
+                        .WithMany()
+                        .HasForeignKey("IdRoom")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guest");
+
+                    b.Navigation("Room");
                 });
 #pragma warning restore 612, 618
         }
