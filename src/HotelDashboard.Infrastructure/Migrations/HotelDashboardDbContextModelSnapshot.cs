@@ -37,11 +37,11 @@ namespace HotelDashboard.Infrastructure.Migrations
                         .HasColumnType("datetime2")
                         .HasColumnName("entry_date");
 
-                    b.Property<Guid>("IdGuest")
+                    b.Property<Guid?>("IdGuest")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("id_guest");
 
-                    b.Property<Guid>("IdRoom")
+                    b.Property<Guid?>("IdRoom")
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("id_room");
 
@@ -102,6 +102,42 @@ namespace HotelDashboard.Infrastructure.Migrations
                     b.ToTable("guest", (string)null);
                 });
 
+            modelBuilder.Entity("HotelDashboard.Domain.Entities.Reservation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CheckinDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("checkin_date");
+
+                    b.Property<DateTime>("CheckoutDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("checkout_date");
+
+                    b.Property<Guid>("IdGuest")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id_guest");
+
+                    b.Property<Guid>("IdRoom")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id_room");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdGuest");
+
+                    b.HasIndex("IdRoom");
+
+                    b.ToTable("reservation", (string)null);
+                });
+
             modelBuilder.Entity("HotelDashboard.Domain.Entities.Room", b =>
                 {
                     b.Property<Guid>("Id")
@@ -138,6 +174,21 @@ namespace HotelDashboard.Infrastructure.Migrations
                 });
 
             modelBuilder.Entity("HotelDashboard.Domain.Entities.Checkin", b =>
+                {
+                    b.HasOne("HotelDashboard.Domain.Entities.Guest", "Guest")
+                        .WithMany()
+                        .HasForeignKey("IdGuest");
+
+                    b.HasOne("HotelDashboard.Domain.Entities.Room", "Room")
+                        .WithMany()
+                        .HasForeignKey("IdRoom");
+
+                    b.Navigation("Guest");
+
+                    b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("HotelDashboard.Domain.Entities.Reservation", b =>
                 {
                     b.HasOne("HotelDashboard.Domain.Entities.Guest", "Guest")
                         .WithMany()
