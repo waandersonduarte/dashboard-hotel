@@ -5,8 +5,8 @@ namespace HotelDashboard.Domain.Repositories;
 public interface ICheckinRepository
 {
     Task AddAsync(Checkin checkin);
-    Task<bool> ExistsAsync(Guid idGuest);
-    Task<Checkin?> GetByIdAsync(Guid id);
+    Task<bool> ExistsCheckinActiveAsync(Guid? idGuest);
+    Task<Checkin?> GetByIdAsync(Guid? id);
     Task<List<Checkin>> GetListByIdGuestAsync(Guid idGuest);
     Task<List<Checkin>> GetAllAsync();
 }

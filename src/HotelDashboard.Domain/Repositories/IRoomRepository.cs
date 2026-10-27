@@ -7,7 +7,7 @@ public interface IRoomRepository
 {
     Task AddAsync(Room room);
     Task<Room?> GetByNumberRoomAsync(string number);
-    Task<Room?> GetByIdRoomAsync(Guid id);
+    Task<Room?> GetByIdRoomAsync(Guid? id);
     Task<bool> ExistByNumberRoomAsync(string number);
     Task<bool> ExistByIdAvailableRoomAsync(Guid id);
     Task<int> TotalNumberOfRoomsAsync();

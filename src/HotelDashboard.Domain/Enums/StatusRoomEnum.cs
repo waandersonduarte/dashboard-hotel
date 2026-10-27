@@ -6,4 +6,5 @@ public enum StatusRoomEnum
     Occupied = 2,
     Cleaning = 3,
     Maintenance = 4,
+    Reserved = 5
 }
