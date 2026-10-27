@@ -15,46 +15,35 @@ public sealed class CheckinUseCase : ICheckinUseCase
     private readonly ICheckinRepository _checkinRepository;
     private readonly IRoomRepository _roomRepository;
     private readonly IGuestRepository _guestRepository;
+    private readonly IReservationRepository _reservationRepository;
 
-    public CheckinUseCase(IUnitOfWork unitOfWork, ICheckinRepository checkinRepository, IRoomRepository roomRepository, IGuestRepository guestRepository)
+    public CheckinUseCase(IUnitOfWork unitOfWork, ICheckinRepository checkinRepository, IRoomRepository roomRepository, IGuestRepository guestRepository, IReservationRepository reservationRepository)
     {
         _unitOfWork = unitOfWork;
         _checkinRepository = checkinRepository;
         _roomRepository = roomRepository;
         _guestRepository = guestRepository;
+        _reservationRepository = reservationRepository;
     }
 
     public async Task<CheckinResponse> SaveAsync(CheckinRequest request)
     {
-        var validator = new RegisterCheckinValidator();
-        var result = validator.Validate(request);
+        var reservation = await _reservationRepository.GetByIdAsync(request.IdReservation);
+        if(reservation == null)
+            // Realiza checkin sem reserva
+            return await CheckinWithoutReservation(request);
+        
+        if(reservation.Status != StatusReservationEnum.Confirmed)
+            throw new ErrorOnValidationException("A reserva não foi confirmada.");
 
-        var existingCheckin = await _checkinRepository.ExistsAsync(request.IdGuest);
-        if (existingCheckin)
+        var checkin = new Domain.Entities.Checkin
         {
-            result.Errors.Add(new ValidationFailure(string.Empty, "O hospede já possui um checkin registrado."));
-        }
-
-        var existingGuest = await _guestRepository.ExistById(request.IdGuest);
-        if(!existingGuest)
-            throw new NotFoundException("Hóspede não encontrado.");
-
-        var room = await _roomRepository.GetByIdRoomAsync(request.IdRoom);
-        if(room == null)
-            throw new NotFoundException("Quarto não encontrado.");
-
-        if(room.Status != Domain.Enums.StatusRoomEnum.Available)
-            result.Errors.Add(new ValidationFailure(string.Empty, "O quarto informado não está disponível."));
-
-        if(!result.IsValid)
-        {
-            var errorMessages = result.Errors.Select(e => e.ErrorMessage).ToList();
-            throw new ErrorOnValidationException(errorMessages);
-        }
-
-        var checkin = request.Adapt<Domain.Entities.Checkin>();
-        checkin.EntryDate = DateTime.Now;
-        room!.Status = Domain.Enums.StatusRoomEnum.Occupied;
+            IdGuest = reservation.IdGuest,
+            IdRoom = reservation.IdRoom,
+            EntryDate = DateTime.Now,
+            Status = StatusCheckinEnum.Active
+        };
+        reservation.Room?.Status = StatusRoomEnum.Occupied;
 
         await _checkinRepository.AddAsync(checkin);
         await _unitOfWork.CommitAsync();
@@ -114,5 +103,37 @@ public sealed class CheckinUseCase : ICheckinUseCase
             throw new NotFoundException("Nenhum checkin encontrado.");
         
         return checkin.Adapt<List<CheckinResponse>>();
+    }
+
+    private async Task<CheckinResponse> CheckinWithoutReservation(CheckinRequest request)
+    {
+        var existingCheckin = await _checkinRepository.ExistsCheckinActiveAsync(request.IdGuest);
+        if (existingCheckin)
+            throw new ErrorOnValidationException("O hospede já possui um checkin ativo.");
+
+        var existingGuest = await _guestRepository.ExistById(request.IdGuest);
+        if(!existingGuest)
+            throw new NotFoundException("Hóspede não encontrado.");
+
+        var room = await _roomRepository.GetByIdRoomAsync(request.IdRoom);
+        if(room == null)
+            throw new NotFoundException("Quarto não encontrado.");
+
+        if(room.Status != StatusRoomEnum.Available)
+            throw new ErrorOnValidationException("O quarto informado não está disponível.");
+
+        var checkin = new Domain.Entities.Checkin
+        {
+            IdGuest = request.IdGuest,
+            IdRoom = request.IdRoom,
+            EntryDate = DateTime.Now,
+            Status = StatusCheckinEnum.Active
+        };
+        room?.Status = StatusRoomEnum.Occupied;
+
+        await _checkinRepository.AddAsync(checkin);
+        await _unitOfWork.CommitAsync();
+
+        return checkin.Adapt<CheckinResponse>();
     }
 }

@@ -1,5 +1,6 @@
 
 using HotelDashboard.Domain.Entities;
+using HotelDashboard.Domain.Enums;
 using HotelDashboard.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,8 +16,8 @@ internal sealed class CheckinRepository : ICheckinRepository
     }
 
     public async Task AddAsync(Checkin checkin) => await _dbContext.Checkins.AddAsync(checkin);
-    public async Task<bool> ExistsAsync(Guid idGuest) => await _dbContext.Checkins.AnyAsync(c => c.IdGuest == idGuest);
+    public async Task<bool> ExistsCheckinActiveAsync(Guid? idGuest) => await _dbContext.Checkins.AnyAsync(c => c.IdGuest == idGuest && c.Status == StatusCheckinEnum.Active);
     public async Task<List<Checkin>> GetListByIdGuestAsync(Guid idGuest) => await _dbContext.Checkins.Where(c => c.IdGuest == idGuest).ToListAsync();
-    public async Task<Checkin?> GetByIdAsync(Guid id) => await _dbContext.Checkins.FirstOrDefaultAsync(c => c.Id == id);
+    public async Task<Checkin?> GetByIdAsync(Guid? id) => await _dbContext.Checkins.FirstOrDefaultAsync(c => c.Id == id);
     public async Task<List<Checkin>> GetAllAsync() => await _dbContext.Checkins.ToListAsync();
 }
