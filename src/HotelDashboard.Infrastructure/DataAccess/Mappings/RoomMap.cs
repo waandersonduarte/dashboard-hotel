@@ -14,7 +14,7 @@ internal sealed class RoomMap : IEntityTypeConfiguration<Room>
         builder.Property(h => h.Number).HasColumnName("number").IsRequired();
         builder.Property(h => h.Type).HasColumnName("type").IsRequired().HasMaxLength(50);
         builder.Property(h => h.Capacity).HasColumnName("capacity").IsRequired();
-        builder.Property(h => h.PricePerNight).HasColumnName("price_per_night");
+        builder.Property(h => h.DailyRate).HasColumnName("daily_rate");
         builder.Property(h => h.Status).HasColumnName("status");
     }
 }
