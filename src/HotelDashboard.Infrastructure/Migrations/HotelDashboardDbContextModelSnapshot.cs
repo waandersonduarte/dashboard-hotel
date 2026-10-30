@@ -22,6 +22,36 @@ namespace HotelDashboard.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("HotelDashboard.Domain.Entities.Account", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime?>("DateClosing")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("date_closing");
+
+                    b.Property<Guid>("IdCheckin")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id_checkin");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnName("status");
+
+                    b.Property<decimal?>("TotalAmount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("total_amount");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdCheckin");
+
+                    b.ToTable("account", (string)null);
+                });
+
             modelBuilder.Entity("HotelDashboard.Domain.Entities.Checkin", b =>
                 {
                     b.Property<Guid>("Id")
@@ -102,6 +132,46 @@ namespace HotelDashboard.Infrastructure.Migrations
                     b.ToTable("guest", (string)null);
                 });
 
+            modelBuilder.Entity("HotelDashboard.Domain.Entities.Payment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("amount");
+
+                    b.Property<Guid?>("IdAccount")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id_account");
+
+                    b.Property<Guid?>("IdReservation")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id_reservation");
+
+                    b.Property<int>("MethodPayment")
+                        .HasColumnType("int")
+                        .HasColumnName("method_payment");
+
+                    b.Property<DateTime>("PaymentDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("payment_date");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdAccount");
+
+                    b.HasIndex("IdReservation");
+
+                    b.ToTable("payment", (string)null);
+                });
+
             modelBuilder.Entity("HotelDashboard.Domain.Entities.Reservation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -129,6 +199,10 @@ namespace HotelDashboard.Infrastructure.Migrations
                         .HasColumnType("int")
                         .HasColumnName("status");
 
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("total_amount");
+
                     b.HasKey("Id");
 
                     b.HasIndex("IdGuest");
@@ -149,14 +223,14 @@ namespace HotelDashboard.Infrastructure.Migrations
                         .HasColumnType("bigint")
                         .HasColumnName("capacity");
 
+                    b.Property<decimal>("DailyRate")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("daily_rate");
+
                     b.Property<string>("Number")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("number");
-
-                    b.Property<double>("PricePerNight")
-                        .HasColumnType("float")
-                        .HasColumnName("price_per_night");
 
                     b.Property<int>("Status")
                         .HasColumnType("int")
@@ -173,6 +247,17 @@ namespace HotelDashboard.Infrastructure.Migrations
                     b.ToTable("room", (string)null);
                 });
 
+            modelBuilder.Entity("HotelDashboard.Domain.Entities.Account", b =>
+                {
+                    b.HasOne("HotelDashboard.Domain.Entities.Checkin", "Checkin")
+                        .WithMany()
+                        .HasForeignKey("IdCheckin")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Checkin");
+                });
+
             modelBuilder.Entity("HotelDashboard.Domain.Entities.Checkin", b =>
                 {
                     b.HasOne("HotelDashboard.Domain.Entities.Guest", "Guest")
@@ -186,6 +271,21 @@ namespace HotelDashboard.Infrastructure.Migrations
                     b.Navigation("Guest");
 
                     b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("HotelDashboard.Domain.Entities.Payment", b =>
+                {
+                    b.HasOne("HotelDashboard.Domain.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("IdAccount");
+
+                    b.HasOne("HotelDashboard.Domain.Entities.Reservation", "Reservation")
+                        .WithMany()
+                        .HasForeignKey("IdReservation");
+
+                    b.Navigation("Account");
+
+                    b.Navigation("Reservation");
                 });
 
             modelBuilder.Entity("HotelDashboard.Domain.Entities.Reservation", b =>

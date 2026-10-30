@@ -1,12 +1,14 @@
-﻿namespace HotelDashboard.Domain.Entities;
+﻿using HotelDashboard.Domain.Enums;
+
+namespace HotelDashboard.Domain.Entities;
 
 public class Account
 {
-    public Guid Id { get; set; }
-    public string CodeCheckin { get; set; } = string.Empty;
-    public char Status { get; set; }
-    public double ValueTotal { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid IdCheckin { get; set; }
+    public decimal? TotalAmount { get; set; }
     public DateTime? DateClosing { get; set; }
-    public string? MethodPayment { get; set; }
-    public Checkin? Checkin { get; set; }
+    public StatusAccountEnum Status { get; set; }
+
+    public Checkin Checkin { get; set; } = null!;
 }

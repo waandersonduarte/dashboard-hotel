@@ -11,6 +11,8 @@ internal class HotelDashboardDbContext : DbContext
     public DbSet<Room> Rooms { get; set; }
     public DbSet<Checkin> Checkins { get; set; }
     public DbSet<Reservation> Reservations { get; set; }
+    public DbSet<Account> Accounts { get; set; }
+    public DbSet<Payment> Payments { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
