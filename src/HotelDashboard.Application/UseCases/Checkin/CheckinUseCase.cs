@@ -1,7 +1,6 @@
-using FluentValidation.Results;
-using HotelDashboard.Application.Validators.Checkin;
 using HotelDashboard.Communication.Requests;
 using HotelDashboard.Communication.Responses;
+using HotelDashboard.Domain.Entities;
 using HotelDashboard.Domain.Enums;
 using HotelDashboard.Domain.Exceptions;
 using HotelDashboard.Domain.Repositories;
@@ -16,14 +15,21 @@ public sealed class CheckinUseCase : ICheckinUseCase
     private readonly IRoomRepository _roomRepository;
     private readonly IGuestRepository _guestRepository;
     private readonly IReservationRepository _reservationRepository;
+    private readonly IAccountRepository _accountRepository;
 
-    public CheckinUseCase(IUnitOfWork unitOfWork, ICheckinRepository checkinRepository, IRoomRepository roomRepository, IGuestRepository guestRepository, IReservationRepository reservationRepository)
+    public CheckinUseCase(IUnitOfWork unitOfWork, 
+        ICheckinRepository checkinRepository, 
+        IRoomRepository roomRepository, 
+        IGuestRepository guestRepository, 
+        IReservationRepository reservationRepository, 
+        IAccountRepository accountRepository)
     {
         _unitOfWork = unitOfWork;
         _checkinRepository = checkinRepository;
         _roomRepository = roomRepository;
         _guestRepository = guestRepository;
         _reservationRepository = reservationRepository;
+        _accountRepository = accountRepository;
     }
 
     public async Task<CheckinResponse> SaveAsync(CheckinRequest request)
@@ -46,6 +52,7 @@ public sealed class CheckinUseCase : ICheckinUseCase
         reservation.Room?.Status = StatusRoomEnum.Occupied;
 
         await _checkinRepository.AddAsync(checkin);
+        await CreateAccount(checkin.Id);
         await _unitOfWork.CommitAsync();
 
         return checkin.Adapt<CheckinResponse>();
@@ -132,8 +139,19 @@ public sealed class CheckinUseCase : ICheckinUseCase
         room?.Status = StatusRoomEnum.Occupied;
 
         await _checkinRepository.AddAsync(checkin);
+        await CreateAccount(checkin.Id);
         await _unitOfWork.CommitAsync();
 
         return checkin.Adapt<CheckinResponse>();
+    }
+
+    private async Task CreateAccount(Guid idCheckin)
+    {
+        var account = new Account
+        {
+            IdCheckin = idCheckin,
+            Status = StatusAccountEnum.Open
+        };
+        await _accountRepository.AddAsync(account);
     }
 }

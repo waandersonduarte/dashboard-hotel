@@ -15,6 +15,7 @@ public class ReservationMap : IEntityTypeConfiguration<Reservation>
         builder.Property(h => h.IdRoom).HasColumnName("id_room");
         builder.Property(h => h.CheckinDate).HasColumnName("checkin_date");
         builder.Property(h => h.CheckoutDate).HasColumnName("checkout_date");
+        builder.Property(h => h.TotalAmount).HasColumnName("total_amount");
         builder.Property(h => h.Status).HasColumnName("status");
 
         builder.HasOne(x => x.Guest).WithMany().HasForeignKey(x => x.IdGuest);

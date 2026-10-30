@@ -7,6 +7,6 @@ public class Room
     public string Number { get; set; } = string.Empty;
     public string Type { get; set; } = string.Empty;
     public long Capacity { get; set; }
-    public double PricePerNight { get; set; }
+    public decimal DailyRate { get; set; }
     public StatusRoomEnum Status { get; set; }
 }

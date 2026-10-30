@@ -2,13 +2,12 @@ using FluentValidation.Results;
 using HotelDashboard.Application.Validators.Checkin;
 using HotelDashboard.Communication.Requests;
 using HotelDashboard.Communication.Responses;
-using HotelDashboard.Domain.Entities;
 using HotelDashboard.Domain.Enums;
 using HotelDashboard.Domain.Exceptions;
 using HotelDashboard.Domain.Repositories;
 using Mapster;
 
-namespace HotelDashboard.Application.UseCases.Checkin;
+namespace HotelDashboard.Application.UseCases.Reservation;
 
 public sealed class ReservationUseCase : IReservationUseCase
 {
@@ -53,7 +52,11 @@ public sealed class ReservationUseCase : IReservationUseCase
             throw new ErrorOnValidationException(errorMessages);
         }
 
-        var reservation = request.Adapt<Reservation>();
+        var reservation = request.Adapt<Domain.Entities.Reservation>();
+        var totalDays = (request.CheckoutDate.Date - request.CheckinDate.Date).Days;
+        var totalAmount = room.DailyRate * totalDays;
+
+        reservation.TotalAmount = totalAmount;
         reservation.Status = StatusReservationEnum.Pending;
         room!.Status = StatusRoomEnum.Reserved;
 

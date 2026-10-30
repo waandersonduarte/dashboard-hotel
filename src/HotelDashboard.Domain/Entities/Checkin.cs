@@ -11,7 +11,7 @@ public class Checkin
     public DateTime? DepartureDate { get; set; }
     public StatusCheckinEnum Status { get; set; }
 
-    public Guest Guest { get; set; } = new();
-    public Room Room { get; set; } = new ();
+    public Guest Guest { get; set; } = null!;
+    public Room Room { get; set; } = null!;
     //public List<Consumo> Consumos { get; set; }
 }

@@ -1,7 +1,7 @@
 using HotelDashboard.Communication.Requests;
 using HotelDashboard.Communication.Responses;
 
-namespace HotelDashboard.Application.UseCases.Checkin;
+namespace HotelDashboard.Application.UseCases.Reservation;
 
 public interface IReservationUseCase
 {

@@ -1,4 +1,4 @@
-using HotelDashboard.Application.UseCases.Checkin;
+using HotelDashboard.Application.UseCases.Reservation;
 using HotelDashboard.Communication.Requests;
 using HotelDashboard.Communication.Responses;
 using Microsoft.AspNetCore.Mvc;
