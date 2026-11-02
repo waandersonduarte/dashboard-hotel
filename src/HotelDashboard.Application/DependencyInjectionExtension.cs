@@ -1,4 +1,5 @@
 using HotelDashboard.Application.UseCases.Checkin;
+using HotelDashboard.Application.UseCases.Consumption;
 using HotelDashboard.Application.UseCases.Guest;
 using HotelDashboard.Application.UseCases.Payment;
 using HotelDashboard.Application.UseCases.Reservation;
@@ -16,5 +17,6 @@ public static class DependencyInjectionExtension
         services.AddScoped<ICheckinUseCase, CheckinUseCase>();
         services.AddScoped<IReservationUseCase, ReservationUseCase>();
         services.AddScoped<IPaymentUseCase, PaymentUseCase>();
+        services.AddScoped<IConsumptionUseCase, ConsumptionUseCase>();
     }
 }
