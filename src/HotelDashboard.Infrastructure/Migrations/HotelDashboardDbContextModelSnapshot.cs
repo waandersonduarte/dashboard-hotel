@@ -88,6 +88,50 @@ namespace HotelDashboard.Infrastructure.Migrations
                     b.ToTable("checkin", (string)null);
                 });
 
+            modelBuilder.Entity("HotelDashboard.Domain.Entities.Consumption", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("Date");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("description");
+
+                    b.Property<Guid>("IdAccount")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("Id_account");
+
+                    b.Property<string>("Item")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)")
+                        .HasColumnName("item");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int")
+                        .HasColumnName("Quantity");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int")
+                        .HasColumnName("status");
+
+                    b.Property<decimal>("Value")
+                        .HasColumnType("decimal(18,2)")
+                        .HasColumnName("Value");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdAccount");
+
+                    b.ToTable("consumption", (string)null);
+                });
+
             modelBuilder.Entity("HotelDashboard.Domain.Entities.Guest", b =>
                 {
                     b.Property<Guid>("Id")
@@ -271,6 +315,17 @@ namespace HotelDashboard.Infrastructure.Migrations
                     b.Navigation("Guest");
 
                     b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("HotelDashboard.Domain.Entities.Consumption", b =>
+                {
+                    b.HasOne("HotelDashboard.Domain.Entities.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("IdAccount")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("HotelDashboard.Domain.Entities.Payment", b =>

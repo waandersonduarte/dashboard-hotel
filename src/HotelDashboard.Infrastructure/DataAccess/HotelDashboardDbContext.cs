@@ -13,6 +13,7 @@ internal class HotelDashboardDbContext : DbContext
     public DbSet<Reservation> Reservations { get; set; }
     public DbSet<Account> Accounts { get; set; }
     public DbSet<Payment> Payments { get; set; }
+    public DbSet<Consumption> Consumptions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

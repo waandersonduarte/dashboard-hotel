@@ -18,6 +18,7 @@ public static class DependencyInjectionExtension
         services.AddScoped<IReservationRepository, ReservationRepository>();
         services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<IPaymentRepository, PaymentRepository>();
+        services.AddScoped<IConsumptionRepository, ConsumptionRepository>();
 
         services.AddDbContext<HotelDashboardDbContext>(options =>
         {
