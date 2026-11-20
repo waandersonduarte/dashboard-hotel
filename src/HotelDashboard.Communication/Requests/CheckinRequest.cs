@@ -4,5 +4,7 @@ public class CheckinRequest
 {
     public Guid? IdReservation { get; set; }
     public Guid? IdGuest { get; set; }
-    public Guid? IdRoom { get; set; } 
+    public Guid? IdRoom { get; set; }
+    public DateTime? CheckinDate { get; set; }
+    public DateTime? CheckoutDate { get; set; } 
 }

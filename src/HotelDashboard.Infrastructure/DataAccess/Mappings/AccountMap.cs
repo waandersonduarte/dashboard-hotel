@@ -17,5 +17,6 @@ public class AccountMap : IEntityTypeConfiguration<Account>
         builder.Property(h => h.Status).HasColumnName("status");
 
         builder.HasOne(x => x.Checkin).WithMany().HasForeignKey(x => x.IdCheckin);
+        builder.HasMany(x => x.Consumptions).WithOne(x => x.Account).HasForeignKey(x => x.IdAccount).OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -1,5 +1,6 @@
 
 using HotelDashboard.Domain.Entities;
+using HotelDashboard.Domain.Enums;
 using HotelDashboard.Domain.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,5 +17,6 @@ internal sealed class ConsumptionRepository : IConsumptionRepository
 
     public async Task AddAsync(Consumption consumption) => await _dbContext.Consumptions.AddAsync(consumption);
     public async Task<Consumption?> GetByIdAsync(Guid id) => await _dbContext.Consumptions.FirstOrDefaultAsync(c => c.Id == id);
-    public async Task<List<Consumption>> GetByIdListAsync(Guid idAccount) => await _dbContext.Consumptions.Where(c => c.IdAccount == idAccount).ToListAsync();
+    public async Task<List<Consumption>> GetByIdListAsync(Guid? idAccount) => await _dbContext.Consumptions.Where(c => c.IdAccount == idAccount).ToListAsync();
+    public async Task<IQueryable<Consumption>> GetByIdValuePendingListAsync(Guid? idAccount) => _dbContext.Consumptions.Where(c => c.IdAccount == idAccount && c.Status == StatusConsumptionEnum.Pending);
 }

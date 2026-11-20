@@ -59,13 +59,13 @@ namespace HotelDashboard.Infrastructure.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasColumnName("id");
 
-                    b.Property<DateTime?>("DepartureDate")
+                    b.Property<DateTime>("CheckinDate")
                         .HasColumnType("datetime2")
-                        .HasColumnName("departure_date");
+                        .HasColumnName("checkin_date");
 
-                    b.Property<DateTime?>("EntryDate")
+                    b.Property<DateTime>("CheckoutDate")
                         .HasColumnType("datetime2")
-                        .HasColumnName("entry_date");
+                        .HasColumnName("checkout_date");
 
                     b.Property<Guid?>("IdGuest")
                         .HasColumnType("uniqueidentifier")
@@ -106,7 +106,7 @@ namespace HotelDashboard.Infrastructure.Migrations
 
                     b.Property<Guid>("IdAccount")
                         .HasColumnType("uniqueidentifier")
-                        .HasColumnName("Id_account");
+                        .HasColumnName("id_account");
 
                     b.Property<string>("Item")
                         .IsRequired()
@@ -320,9 +320,9 @@ namespace HotelDashboard.Infrastructure.Migrations
             modelBuilder.Entity("HotelDashboard.Domain.Entities.Consumption", b =>
                 {
                     b.HasOne("HotelDashboard.Domain.Entities.Account", "Account")
-                        .WithMany()
+                        .WithMany("Consumptions")
                         .HasForeignKey("IdAccount")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Account");
@@ -360,6 +360,11 @@ namespace HotelDashboard.Infrastructure.Migrations
                     b.Navigation("Guest");
 
                     b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("HotelDashboard.Domain.Entities.Account", b =>
+                {
+                    b.Navigation("Consumptions");
                 });
 #pragma warning restore 612, 618
         }

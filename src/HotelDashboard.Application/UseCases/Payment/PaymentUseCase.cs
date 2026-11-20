@@ -14,22 +14,26 @@ public sealed class PaymentUseCase : IPaymentUseCase
     private readonly IReservationRepository _reservationRepository;
     private readonly IAccountRepository _accountRepository;
     private readonly IPaymentRepository _paymentRepository;
+    private readonly IConsumptionRepository _consumptionRepository;
 
     public PaymentUseCase(IUnitOfWork unitOfWork,
         IReservationRepository reservationRepository,
         IPaymentRepository paymentRepository,
-        IAccountRepository accountRepository)
+        IAccountRepository accountRepository,
+        IConsumptionRepository consumptionRepository)
     {
         _unitOfWork = unitOfWork;
         _reservationRepository = reservationRepository;
         _paymentRepository = paymentRepository;
         _accountRepository = accountRepository;
+        _consumptionRepository = consumptionRepository;
     }
 
     public async Task<PaymentResponse> SaveAsync(PaymentRequest request)
     {
         Domain.Entities.Reservation? reservation = null;
         Account? account = null;
+        decimal amount = 0;
 
         if (request.IdReservation.HasValue)
         {
@@ -44,15 +48,19 @@ public sealed class PaymentUseCase : IPaymentUseCase
             if(account == null)
                 throw new NotFoundException("Conta não encontrada.");  
         }
+        var consumptions = await _consumptionRepository.GetByIdValuePendingListAsync(request.IdAccount);
+        amount += consumptions.Sum(c => c.Value * c.Quantity);
+        amount += reservation?.TotalAmount ?? 0 + account?.TotalAmount ?? 0;
 
-        var amount = reservation?.TotalAmount ?? 0 + account?.TotalAmount ?? 0;
+        if(amount <= 0)
+            throw new ErrorOnValidationException("Não há valores pendentes para pagamento.");
         
         var payment = new Domain.Entities.Payment
         {
             IdReservation = reservation?.Id ?? null,
             Amount = amount,
             PaymentDate = DateTime.Now,
-            Status = StatusPaymentEnum.Pending
+            Status = StatusPaymentEnum.Paid
         };
 
         switch (request.MethodPayment)
@@ -73,9 +81,11 @@ public sealed class PaymentUseCase : IPaymentUseCase
                 payment.MethodPayment = PaymentMethodEnum.BankTransfer;
                 break;
             default:
-                throw new ErrorOnValidationException("Status inválido.");
+                throw new ErrorOnValidationException("Método de pagamento inválido.");
         }
         reservation?.Status = StatusReservationEnum.Confirmed;
+        consumptions.ToList().ForEach(c => c.Status = StatusConsumptionEnum.Invoiced);
+        
         await _paymentRepository.AddAsync(payment);
         await _unitOfWork.CommitAsync();
 

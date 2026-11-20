@@ -35,6 +35,11 @@ public sealed class ReservationUseCase : IReservationUseCase
             result.Errors.Add(new ValidationFailure(string.Empty, "O hospede já possui uma reserva pendente ou confirmada."));
         }
 
+        if(request.CheckinDate >= request.CheckoutDate)
+        {
+            result.Errors.Add(new ValidationFailure(string.Empty, "A data de check-in deve ser anterior à data de check-out."));
+        }
+
         var existingGuest = await _guestRepository.ExistById(request.IdGuest);
         if(!existingGuest)
             throw new NotFoundException("Hóspede não encontrado.");
@@ -53,7 +58,7 @@ public sealed class ReservationUseCase : IReservationUseCase
         }
 
         var reservation = request.Adapt<Domain.Entities.Reservation>();
-        var totalDays = (request.CheckoutDate.Date - request.CheckinDate.Date).Days;
+        var totalDays = (reservation.CheckoutDate.Date - reservation.CheckinDate.Date).Days;
         var totalAmount = room.DailyRate * totalDays;
 
         reservation.TotalAmount = totalAmount;
@@ -108,7 +113,10 @@ public sealed class ReservationUseCase : IReservationUseCase
 
         if(room.Status is not (StatusRoomEnum.Available or StatusRoomEnum.Reserved))
             throw new ErrorOnValidationException("O quarto não está disponível para o período informado.");
-    
+        
+        if(request.CheckinDate >= request.CheckoutDate)
+            throw new ErrorOnValidationException("A data de check-in deve ser anterior à data de check-out.");
+        
         request.Adapt(reservation);
         await _unitOfWork.CommitAsync();
 

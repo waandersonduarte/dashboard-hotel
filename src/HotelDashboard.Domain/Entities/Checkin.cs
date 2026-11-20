@@ -7,8 +7,8 @@ public class Checkin
     public Guid Id { get; set; }
     public Guid? IdGuest { get; set; }
     public Guid? IdRoom { get; set; }
-    public DateTime? EntryDate { get; set; }
-    public DateTime? DepartureDate { get; set; }
+    public DateTime CheckinDate { get; set; }
+    public DateTime CheckoutDate { get; set; }
     public StatusCheckinEnum Status { get; set; }
 
     public Guest Guest { get; set; } = null!;

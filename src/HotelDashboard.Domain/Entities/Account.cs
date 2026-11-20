@@ -11,4 +11,5 @@ public class Account
     public StatusAccountEnum Status { get; set; }
 
     public Checkin Checkin { get; set; } = null!;
+    public ICollection<Consumption> Consumptions { get; set; } = new List<Consumption>();
 }
