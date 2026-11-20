@@ -13,8 +13,8 @@ public class CheckinMap : IEntityTypeConfiguration<Checkin>
         builder.Property(h => h.Id).HasColumnName("id");
         builder.Property(h => h.IdGuest).HasColumnName("id_guest");
         builder.Property(h => h.IdRoom).HasColumnName("id_room");
-        builder.Property(h => h.EntryDate).HasColumnName("entry_date");
-        builder.Property(h => h.DepartureDate).HasColumnName("departure_date");
+        builder.Property(h => h.CheckinDate).HasColumnName("checkin_date");
+        builder.Property(h => h.CheckoutDate).HasColumnName("checkout_date");
         builder.Property(h => h.Status).HasColumnName("status");
 
         builder.HasOne(x => x.Guest).WithMany().HasForeignKey(x => x.IdGuest);

@@ -6,5 +6,6 @@ public interface IConsumptionRepository
 {
     Task AddAsync(Consumption consumption);
     Task<Consumption?> GetByIdAsync(Guid id);
-    Task<List<Consumption>> GetByIdListAsync(Guid idAccount);
+    Task<List<Consumption>> GetByIdListAsync(Guid? idAccount);
+    Task<IQueryable<Consumption>> GetByIdValuePendingListAsync(Guid? idAccount);
 }

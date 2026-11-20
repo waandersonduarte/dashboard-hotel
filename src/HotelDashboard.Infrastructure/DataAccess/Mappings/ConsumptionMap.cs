@@ -11,14 +11,12 @@ public class ConsumptionMap : IEntityTypeConfiguration<Consumption>
         builder.ToTable("consumption");
         builder.HasKey(h => h.Id);
         builder.Property(h => h.Id).HasColumnName("id");
-        builder.Property(h => h.IdAccount).HasColumnName("Id_account");
+        builder.Property(h => h.IdAccount).HasColumnName("id_account");
         builder.Property(h => h.Item).HasColumnName("item");
         builder.Property(h => h.Description).HasColumnName("description");
         builder.Property(h => h.Value).HasColumnName("Value");
         builder.Property(h => h.Quantity).HasColumnName("Quantity");
         builder.Property(h => h.Date).HasColumnName("Date");
         builder.Property(h => h.Status).HasColumnName("status");
-
-        builder.HasOne(x => x.Account).WithMany().HasForeignKey(x => x.IdAccount);
     }
 }

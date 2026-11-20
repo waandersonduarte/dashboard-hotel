@@ -42,17 +42,17 @@ public sealed class CheckinUseCase : ICheckinUseCase
         if(reservation.Status != StatusReservationEnum.Confirmed)
             throw new ErrorOnValidationException("A reserva não foi confirmada.");
 
-        var checkin = new Domain.Entities.Checkin
-        {
-            IdGuest = reservation.IdGuest,
-            IdRoom = reservation.IdRoom,
-            EntryDate = DateTime.Now,
-            Status = StatusCheckinEnum.Active
-        };
+        var checkin = request.Adapt<Domain.Entities.Checkin>();
+        checkin.Status = StatusCheckinEnum.Active;
+        
         reservation.Room?.Status = StatusRoomEnum.Occupied;
-
         await _checkinRepository.AddAsync(checkin);
-        await CreateAccount(checkin.Id);
+
+        var account = await CreateAccount(checkin.Id);
+        var totalDays = (checkin.CheckoutDate.Date - checkin.CheckinDate.Date).Days;
+        var totalAmount = reservation.Room!.DailyRate * totalDays;
+
+        account.TotalAmount = totalAmount;
         await _unitOfWork.CommitAsync();
 
         return checkin.Adapt<CheckinResponse>();
@@ -129,29 +129,40 @@ public sealed class CheckinUseCase : ICheckinUseCase
         if(room.Status != StatusRoomEnum.Available)
             throw new ErrorOnValidationException("O quarto informado não está disponível.");
 
-        var checkin = new Domain.Entities.Checkin
-        {
-            IdGuest = request.IdGuest,
-            IdRoom = request.IdRoom,
-            EntryDate = DateTime.Now,
-            Status = StatusCheckinEnum.Active
-        };
+        if(!request.IdReservation.HasValue && request.CheckinDate >= request.CheckoutDate)
+            throw new ErrorOnValidationException("A data de check-in deve ser anterior à data de check-out.");
+        
+        if(!request.IdReservation.HasValue && !request.CheckinDate.HasValue)
+            throw new ErrorOnValidationException("A data de check-in deve ser informada.");
+        
+         if(!request.IdReservation.HasValue && !request.CheckoutDate.HasValue)
+            throw new ErrorOnValidationException("A data de check-out deve ser informada.");
+        
+
+        var checkin = request.Adapt<Domain.Entities.Checkin>();
+        checkin.Status = StatusCheckinEnum.Active;
+        
         room?.Status = StatusRoomEnum.Occupied;
-
         await _checkinRepository.AddAsync(checkin);
-        await CreateAccount(checkin.Id);
-        await _unitOfWork.CommitAsync();
 
+        var account = await CreateAccount(checkin.Id);
+        var totalDays = (checkin.CheckoutDate.Date - checkin.CheckinDate.Date).Days;
+        var totalAmount = room!.DailyRate * totalDays;
+        account.TotalAmount = totalAmount;
+
+        await _unitOfWork.CommitAsync();
         return checkin.Adapt<CheckinResponse>();
     }
 
-    private async Task CreateAccount(Guid idCheckin)
+    private async Task<Account> CreateAccount(Guid idCheckin)
     {
         var account = new Account
         {
             IdCheckin = idCheckin,
             Status = StatusAccountEnum.Open
         };
+
         await _accountRepository.AddAsync(account);
+        return account;
     }
 }
