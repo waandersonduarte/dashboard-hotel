@@ -9,7 +9,6 @@ public class Reservation
     public Guid IdRoom { get; set; }
     public DateTime CheckinDate { get; set; }
     public DateTime CheckoutDate { get; set; }
-    public decimal TotalAmount { get; set; }
     public StatusReservationEnum Status { get; set; }
 
     public Guest Guest { get; set; } = null!;

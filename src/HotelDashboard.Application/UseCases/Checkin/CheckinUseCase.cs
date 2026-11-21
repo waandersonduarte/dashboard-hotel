@@ -1,3 +1,4 @@
+using HotelDashboard.Application.Services.Charges;
 using HotelDashboard.Communication.Requests;
 using HotelDashboard.Communication.Responses;
 using HotelDashboard.Domain.Entities;
@@ -16,13 +17,17 @@ public sealed class CheckinUseCase : ICheckinUseCase
     private readonly IGuestRepository _guestRepository;
     private readonly IReservationRepository _reservationRepository;
     private readonly IAccountRepository _accountRepository;
+    private readonly IChargeRepository _chargeRepository;
+    private readonly IChargeService _chargeService;
 
-    public CheckinUseCase(IUnitOfWork unitOfWork, 
-        ICheckinRepository checkinRepository, 
-        IRoomRepository roomRepository, 
-        IGuestRepository guestRepository, 
-        IReservationRepository reservationRepository, 
-        IAccountRepository accountRepository)
+    public CheckinUseCase(IUnitOfWork unitOfWork,
+        ICheckinRepository checkinRepository,
+        IRoomRepository roomRepository,
+        IGuestRepository guestRepository,
+        IReservationRepository reservationRepository,
+        IAccountRepository accountRepository,
+        IChargeRepository chargeRepository,
+        IChargeService chargeService)
     {
         _unitOfWork = unitOfWork;
         _checkinRepository = checkinRepository;
@@ -30,6 +35,8 @@ public sealed class CheckinUseCase : ICheckinUseCase
         _guestRepository = guestRepository;
         _reservationRepository = reservationRepository;
         _accountRepository = accountRepository;
+        _chargeRepository = chargeRepository;
+        _chargeService = chargeService;
     }
 
     public async Task<CheckinResponse> SaveAsync(CheckinRequest request)
@@ -42,19 +49,25 @@ public sealed class CheckinUseCase : ICheckinUseCase
         if(reservation.Status != StatusReservationEnum.Confirmed)
             throw new ErrorOnValidationException("A reserva não foi confirmada.");
 
+        var charge = await _chargeRepository.GetAccommodationByReservationIdAsync(reservation.Id);
+        if (charge == null)
+            throw new NotFoundException("Cobrança da hospedagem não encontrada.");
+
+        if (charge.IdAccount.HasValue)
+            throw new ErrorOnValidationException("Esta cobrança já está associada a uma conta.");
+
+
         var checkin = request.Adapt<Domain.Entities.Checkin>();
-        checkin.Status = StatusCheckinEnum.Active;
+        checkin.CheckinDate = DateTime.UtcNow;
+        checkin.CheckoutDate = reservation!.CheckoutDate;
         
         reservation.Room?.Status = StatusRoomEnum.Occupied;
         await _checkinRepository.AddAsync(checkin);
 
         var account = await CreateAccount(checkin.Id);
-        var totalDays = (checkin.CheckoutDate.Date - checkin.CheckinDate.Date).Days;
-        var totalAmount = reservation.Room!.DailyRate * totalDays;
+        charge.IdAccount = account.Id;
 
-        account.TotalAmount = totalAmount;
         await _unitOfWork.CommitAsync();
-
         return checkin.Adapt<CheckinResponse>();
     }
 
@@ -114,13 +127,18 @@ public sealed class CheckinUseCase : ICheckinUseCase
 
     private async Task<CheckinResponse> CheckinWithoutReservation(CheckinRequest request)
     {
-        var existingCheckin = await _checkinRepository.ExistsCheckinActiveAsync(request.IdGuest);
-        if (existingCheckin)
-            throw new ErrorOnValidationException("O hospede já possui um checkin ativo.");
+        if(request.IdGuest == null)
+            throw new ErrorOnValidationException("O hóspede deve ser informado para o checkin sem reserva.");
+        else
+        {
+            var existingCheckin = await _checkinRepository.ExistsCheckinActiveAsync(request.IdGuest);
+            if (existingCheckin)
+                throw new ErrorOnValidationException("O hospede já possui um checkin ativo.");
 
-        var existingGuest = await _guestRepository.ExistById(request.IdGuest);
-        if(!existingGuest)
-            throw new NotFoundException("Hóspede não encontrado.");
+            var existingGuest = await _guestRepository.ExistById(request.IdGuest);
+            if(!existingGuest)
+                throw new NotFoundException("Hóspede não encontrado.");
+        }
 
         var room = await _roomRepository.GetByIdRoomAsync(request.IdRoom);
         if(room == null)
@@ -138,7 +156,7 @@ public sealed class CheckinUseCase : ICheckinUseCase
          if(!request.IdReservation.HasValue && !request.CheckoutDate.HasValue)
             throw new ErrorOnValidationException("A data de check-out deve ser informada.");
         
-
+        var guest = await _guestRepository.GetByIdAsync((Guid)request.IdGuest!);
         var checkin = request.Adapt<Domain.Entities.Checkin>();
         checkin.Status = StatusCheckinEnum.Active;
         
@@ -148,7 +166,15 @@ public sealed class CheckinUseCase : ICheckinUseCase
         var account = await CreateAccount(checkin.Id);
         var totalDays = (checkin.CheckoutDate.Date - checkin.CheckinDate.Date).Days;
         var totalAmount = room!.DailyRate * totalDays;
-        account.TotalAmount = totalAmount;
+
+        await _chargeService.CreateAsync(new ChargeRequest
+        {
+            AccountId = account.Id,
+            Type = (int)ChargeTypeEnum.Accommodation,
+            Description = $"Cobrança referente ao check-in do quarto {room.Number} para o hóspede {guest!.Name}.",
+            Quantity = totalDays,
+            UnitAmount = room.DailyRate
+        });
 
         await _unitOfWork.CommitAsync();
         return checkin.Adapt<CheckinResponse>();

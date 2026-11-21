@@ -1,4 +1,5 @@
 using FluentValidation.Results;
+using HotelDashboard.Application.Services.Charges;
 using HotelDashboard.Application.Validators.Checkin;
 using HotelDashboard.Communication.Requests;
 using HotelDashboard.Communication.Responses;
@@ -15,13 +16,15 @@ public sealed class ReservationUseCase : IReservationUseCase
     private readonly IReservationRepository _reservationRepository;
     private readonly IRoomRepository _roomRepository;
     private readonly IGuestRepository _guestRepository;
+    private readonly IChargeService _chargeService;
 
-    public ReservationUseCase(IUnitOfWork unitOfWork, IReservationRepository reservationRepository, IRoomRepository roomRepository, IGuestRepository guestRepository)
+    public ReservationUseCase(IUnitOfWork unitOfWork, IReservationRepository reservationRepository, IRoomRepository roomRepository, IGuestRepository guestRepository, IChargeService chargeService)
     {
         _unitOfWork = unitOfWork;
         _reservationRepository = reservationRepository;
         _roomRepository = roomRepository;
         _guestRepository = guestRepository;
+        _chargeService = chargeService;
     }
 
     public async Task<ReservationResponse> SaveAsync(ReservationRequest request)
@@ -57,17 +60,26 @@ public sealed class ReservationUseCase : IReservationUseCase
             throw new ErrorOnValidationException(errorMessages);
         }
 
+        var guest = await _guestRepository.GetByIdAsync(request.IdGuest);
+
         var reservation = request.Adapt<Domain.Entities.Reservation>();
         var totalDays = (reservation.CheckoutDate.Date - reservation.CheckinDate.Date).Days;
-        var totalAmount = room.DailyRate * totalDays;
 
-        reservation.TotalAmount = totalAmount;
         reservation.Status = StatusReservationEnum.Pending;
         room!.Status = StatusRoomEnum.Reserved;
 
         await _reservationRepository.AddAsync(reservation);
-        await _unitOfWork.CommitAsync();
 
+        await _chargeService.CreateAsync(new ChargeRequest
+        {
+            ReservationId = reservation.Id,
+            Type = (int)ChargeTypeEnum.Accommodation,
+            Description = $"Cobrança referente à reserva do quarto {room.Number} para o hóspede {guest!.Name}.",
+            Quantity = totalDays,
+            UnitAmount = room.DailyRate
+        });
+
+        await _unitOfWork.CommitAsync();
         return reservation.Adapt<ReservationResponse>();
     }
 
