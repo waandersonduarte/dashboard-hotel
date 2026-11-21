@@ -1,3 +1,4 @@
+using HotelDashboard.Application.Services.Charges;
 using HotelDashboard.Application.Validators.Consumption;
 using HotelDashboard.Communication.Requests;
 using HotelDashboard.Communication.Responses;
@@ -13,12 +14,14 @@ public sealed class ConsumptionUseCase : IConsumptionUseCase
     private readonly IUnitOfWork _unitOfWork;
     private readonly IConsumptionRepository _consumptionRepository;
     private readonly IAccountRepository _accountRepository;
+    private readonly IChargeService _chargeService;
 
-    public ConsumptionUseCase(IUnitOfWork unitOfWork, IConsumptionRepository consumptionRepository, IAccountRepository accountRepository)
+    public ConsumptionUseCase(IUnitOfWork unitOfWork, IConsumptionRepository consumptionRepository, IAccountRepository accountRepository, IChargeService chargeService)
     {
         _consumptionRepository = consumptionRepository;
         _accountRepository = accountRepository;
         _unitOfWork = unitOfWork;
+        _chargeService = chargeService;
     }
 
     public async Task<ConsumptionResponse> SaveAsync(ConsumptionRequest request)
@@ -40,6 +43,16 @@ public sealed class ConsumptionUseCase : IConsumptionUseCase
         consumption.Status = StatusConsumptionEnum.Pending;
 
         await _consumptionRepository.AddAsync(consumption);
+
+        await _chargeService.CreateAsync(new ChargeRequest
+        {
+            AccountId = consumption.IdAccount,
+            ConsumptionId = consumption.Id,
+            Type = (int)ChargeTypeEnum.Consumption,
+            Description = consumption.Description,
+            Quantity = consumption.Quantity,
+            UnitAmount = consumption.Value
+        });
         await _unitOfWork.CommitAsync();
 
         return consumption.Adapt<ConsumptionResponse>();

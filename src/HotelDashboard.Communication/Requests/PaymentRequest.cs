@@ -2,7 +2,13 @@
 
 public class PaymentRequest
 {
-    public Guid? IdReservation { get; set; }
-    public Guid? IdAccount { get; set; }
     public int MethodPayment { get; set; }
+    public decimal Amount { get; set; }
+    public ICollection<PaymentAllocationRequest> Allocations { get; set; } = new List<PaymentAllocationRequest>();
+}
+
+public class PaymentAllocationRequest
+{
+    public Guid ChargeId { get; set; }
+    public decimal Amount { get; set; }
 }
