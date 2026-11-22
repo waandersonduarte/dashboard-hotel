@@ -41,4 +41,13 @@ internal sealed class ChargeRepository : IChargeRepository
             .Where(charge => charge.IdReservation == reservationId)
             .ToListAsync();
     }
+
+    public async Task<List<Charge>> GetByAccountIdWithAllocationsAsync(Guid AccountId)
+    {
+        return await _dbContext.Charges
+            .Include(charge => charge.Allocations)
+                .ThenInclude(charge => charge.Payment)
+            .Where(charge => charge.IdAccount == AccountId)
+            .ToListAsync();
+    }
 }

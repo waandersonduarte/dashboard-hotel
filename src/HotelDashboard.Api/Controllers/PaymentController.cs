@@ -25,4 +25,13 @@ public class PaymentController : ControllerBase
         var result = await _paymentUseCase.SaveAsync(request);
         return Created(string.Empty, result);
     }
+
+    [HttpGet("pending-charges")]
+    [ProducesResponseType(typeof(ChargePendingResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetChargePending([FromQuery] GetPendingChargesRequest request)
+    {
+        var result = await _paymentUseCase.ChargePendingAsync(request);
+        return Ok(result);
+    }
 }
