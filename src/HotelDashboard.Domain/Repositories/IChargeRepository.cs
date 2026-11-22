@@ -8,4 +8,5 @@ public interface IChargeRepository
     Task<Charge?> GetWithPaymentsByIdAsync(Guid id);
     Task<Charge?> GetAccommodationByReservationIdAsync(Guid reservationId);
     Task<List<Charge>> GetByReservationIdWithAllocationsAsync(Guid reservationId);
+    Task<List<Charge>> GetByAccountIdWithAllocationsAsync(Guid AccountId);
 }

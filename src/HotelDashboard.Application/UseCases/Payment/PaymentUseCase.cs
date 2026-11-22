@@ -95,6 +95,50 @@ public sealed class PaymentUseCase : IPaymentUseCase
         return payment.Adapt<PaymentResponse>();
     }
 
+    public async Task<ChargePendingResponse> ChargePendingAsync(GetPendingChargesRequest request)
+    {
+        List<Charge> charges;
+
+        if(request.IdAccount.HasValue && request.IdReservation.HasValue)
+            throw new ErrorOnValidationException("Informe apenas o Id da conta ou da reserva, não ambos.");
+        
+        if(request.IdAccount.HasValue)
+            charges = await _chargeRepository.GetByAccountIdWithAllocationsAsync(request.IdAccount.Value);
+        else if(request.IdReservation.HasValue)
+            charges = await _chargeRepository.GetByReservationIdWithAllocationsAsync(request.IdReservation.Value);
+        else
+            throw new ErrorOnValidationException("Informe o Id da conta ou da reserva para buscar as cobranças pendentes.");
+
+        var pendingCharges = charges.Select(charge =>
+        {
+            var totalPaid = charge.Allocations
+                .Where(x => 
+                    x.Payment.Status == StatusPaymentEnum.Paid)
+                .Sum(x => x.Amount);
+
+            return new ChargeResponse
+            {
+                IdCharge = charge.Id,
+                Description = charge.Description,
+                Amount = charge.Amount,
+                Type = charge.Type.ToString(),
+                PaidAmount = totalPaid,
+                RemainingAmount = charge.Amount - totalPaid
+            };
+        })
+        .Where(charge => charge.RemainingAmount > 0)
+        .ToList();
+
+        if(!pendingCharges.Any())
+            throw new NotFoundException("Não existem cobranças pendentes para o Id informado.");
+
+        return new ChargePendingResponse
+        {
+            TotalPending = pendingCharges.Sum(x => x.RemainingAmount),
+            Charges = pendingCharges
+        };
+    }
+
     private PaymentMethodEnum MapPaymentMethod(int methodPayment)
     {
         return methodPayment switch
