@@ -55,11 +55,22 @@ public sealed class CheckinUseCase : ICheckinUseCase
 
         if (charge.IdAccount.HasValue)
             throw new ErrorOnValidationException("Esta cobrança já está associada a uma conta.");
+        
+        if(reservation.CheckinDate > DateTime.UtcNow)
+            throw new ErrorOnValidationException("O check-in não pode ser realizado antes da data de entrada da reserva.");
+
+        if(reservation.CheckoutDate < DateTime.UtcNow)
+            throw new ErrorOnValidationException("O check-in não pode ser realizado após a data de saída da reserva.");
+        
+        if(await _checkinRepository.ExistsCheckinActiveAsync(reservation.IdGuest))
+            throw new ErrorOnValidationException("O hóspede já possui um check-in ativo.");
 
 
         var checkin = request.Adapt<Domain.Entities.Checkin>();
+        checkin.IdGuest = reservation.IdGuest;
+        checkin.IdRoom = reservation.IdRoom;
         checkin.CheckinDate = DateTime.UtcNow;
-        checkin.CheckoutDate = reservation!.CheckoutDate;
+        checkin.CheckoutDate = reservation.CheckoutDate;
         
         reservation.Room?.Status = StatusRoomEnum.Occupied;
         await _checkinRepository.AddAsync(checkin);
@@ -160,12 +171,11 @@ public sealed class CheckinUseCase : ICheckinUseCase
         var checkin = request.Adapt<Domain.Entities.Checkin>();
         checkin.Status = StatusCheckinEnum.Active;
         
-        room?.Status = StatusRoomEnum.Occupied;
+        room.Status = StatusRoomEnum.Occupied;
         await _checkinRepository.AddAsync(checkin);
 
         var account = await CreateAccount(checkin.Id);
         var totalDays = (checkin.CheckoutDate.Date - checkin.CheckinDate.Date).Days;
-        var totalAmount = room!.DailyRate * totalDays;
 
         await _chargeService.CreateAsync(new ChargeRequest
         {
