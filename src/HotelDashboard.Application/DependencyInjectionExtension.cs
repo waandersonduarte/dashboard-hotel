@@ -1,6 +1,7 @@
 using HotelDashboard.Application.Services.Charges;
 using HotelDashboard.Application.Services.Reservations;
 using HotelDashboard.Application.UseCases.Checkin;
+using HotelDashboard.Application.UseCases.Checkout;
 using HotelDashboard.Application.UseCases.Consumption;
 using HotelDashboard.Application.UseCases.Guest;
 using HotelDashboard.Application.UseCases.Payment;
@@ -22,5 +23,6 @@ public static class DependencyInjectionExtension
         services.AddScoped<IConsumptionUseCase, ConsumptionUseCase>();
         services.AddScoped<IChargeService, ChargeService>();
         services.AddScoped<IReservationConfirmationService, ReservationConfirmationService>();
+        services.AddScoped<ICheckoutUseCase, CheckoutUseCase>();
     }
 }

@@ -139,6 +139,28 @@ namespace HotelDashboard.Infrastructure.Migrations
                     b.ToTable("checkin", (string)null);
                 });
 
+            modelBuilder.Entity("HotelDashboard.Domain.Entities.Checkout", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CheckoutDate")
+                        .HasColumnType("datetime2")
+                        .HasColumnName("checkout_Date");
+
+                    b.Property<Guid>("IdCheckin")
+                        .HasColumnType("uniqueidentifier")
+                        .HasColumnName("id_checkin");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdCheckin");
+
+                    b.ToTable("checkout", (string)null);
+                });
+
             modelBuilder.Entity("HotelDashboard.Domain.Entities.Consumption", b =>
                 {
                     b.Property<Guid>("Id")
@@ -399,6 +421,17 @@ namespace HotelDashboard.Infrastructure.Migrations
                     b.Navigation("Guest");
 
                     b.Navigation("Room");
+                });
+
+            modelBuilder.Entity("HotelDashboard.Domain.Entities.Checkout", b =>
+                {
+                    b.HasOne("HotelDashboard.Domain.Entities.Checkin", "Checkin")
+                        .WithMany()
+                        .HasForeignKey("IdCheckin")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Checkin");
                 });
 
             modelBuilder.Entity("HotelDashboard.Domain.Entities.Consumption", b =>

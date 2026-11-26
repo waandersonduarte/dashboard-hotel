@@ -6,4 +6,5 @@ public interface IAccountRepository
 {
     Task AddAsync(Account account);
     Task<Account?> GetByIdAsync(Guid? id);
+    Task<Account?> GetByIdCheckinIncludeConsumptionChargesAsync(Guid idCheckin);
 }
