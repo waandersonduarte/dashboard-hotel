@@ -22,4 +22,30 @@ internal sealed class RoomRepository : IRoomRepository
     public async Task<int> TotalNumberOfRoomsAsync() => await _dbContext.Rooms.CountAsync();
     public async Task<List<Room>> GetAllAsync() => await _dbContext.Rooms.ToListAsync();
     public async Task<bool> ExistByIdAvailableRoomAsync(Guid id) => await _dbContext.Rooms.AnyAsync(r => r.Id == id && r.Status == StatusRoomEnum.Available);
+
+    public async Task<bool> IsAvailableAsync(Guid idRoom, DateTime checkinDate, DateTime checkoutDate, Guid? excludeReservationId = null)
+    {
+        var hasReservationConflict = await _dbContext.Reservations
+            .AsNoTracking()
+            .AnyAsync(r =>
+                r.IdRoom == idRoom &&
+                (!excludeReservationId.HasValue ||
+                r.Id != excludeReservationId.Value) &&
+                r.Status != StatusReservationEnum.Canceled &&
+                r.CheckinDate < checkoutDate &&
+                r.CheckoutDate > checkinDate);
+
+        if (hasReservationConflict)
+            return false;
+
+        var hasCheckinConflict = await _dbContext.Checkins
+            .AsNoTracking()
+            .AnyAsync(c =>
+                c.IdRoom == idRoom &&
+                c.Status != StatusCheckinEnum.Completed &&
+                c.CheckinDate < checkoutDate &&
+                c.CheckoutDate > checkinDate);
+
+        return !hasCheckinConflict;
+    }
 }

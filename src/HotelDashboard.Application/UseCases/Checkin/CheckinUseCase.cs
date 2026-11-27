@@ -65,14 +65,24 @@ public sealed class CheckinUseCase : ICheckinUseCase
         if(await _checkinRepository.ExistsCheckinActiveAsync(reservation.IdGuest))
             throw new ErrorOnValidationException("O hóspede já possui um check-in ativo.");
 
+        var isAvailable = await _roomRepository.IsAvailableAsync(
+            reservation.IdRoom,
+            reservation.CheckinDate,
+            reservation.CheckoutDate,
+            reservation.Id);
+        if(!isAvailable)
+            throw new ErrorOnValidationException("O quarto informado não está disponível.");
+
 
         var checkin = request.Adapt<Domain.Entities.Checkin>();
         checkin.IdGuest = reservation.IdGuest;
         checkin.IdRoom = reservation.IdRoom;
         checkin.CheckinDate = DateTime.UtcNow;
         checkin.CheckoutDate = reservation.CheckoutDate;
+        checkin.Status = StatusCheckinEnum.Active;
         
         reservation.Room?.Status = StatusRoomEnum.Occupied;
+        reservation.Status = StatusReservationEnum.CheckedIn;
         await _checkinRepository.AddAsync(checkin);
 
         var account = await CreateAccount(checkin.Id);
@@ -155,8 +165,16 @@ public sealed class CheckinUseCase : ICheckinUseCase
         if(room == null)
             throw new NotFoundException("Quarto não encontrado.");
 
-        if(room.Status != StatusRoomEnum.Available)
-            throw new ErrorOnValidationException("O quarto informado não está disponível.");
+        if(request.IdRoom.HasValue && request.CheckinDate.HasValue && request.CheckoutDate.HasValue)
+        {
+            var isAvailable = await _roomRepository.IsAvailableAsync(
+                request.IdRoom.Value,
+                request.CheckinDate.Value,
+                request.CheckoutDate.Value);
+            if(!isAvailable)
+                throw new ErrorOnValidationException("O quarto informado não está disponível.");
+        }
+        
 
         if(!request.IdReservation.HasValue && request.CheckinDate >= request.CheckoutDate)
             throw new ErrorOnValidationException("A data de check-in deve ser anterior à data de check-out.");

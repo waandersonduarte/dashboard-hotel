@@ -6,5 +6,6 @@ public enum StatusReservationEnum
     Confirmed = 2,
     Canceled = 3,
     Completed = 4,
-    NoShow = 5
+    NoShow = 5,
+    CheckedIn = 6
 }
