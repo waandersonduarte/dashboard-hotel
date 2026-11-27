@@ -14,4 +14,5 @@ public interface IRoomRepository
     Task<int> TotalNumberOfOccupiedRoomsAsync();
     Task<int> TotalNumberOfAvailableRoomsAsync();
     Task<List<Room>> GetAllAsync();
+    Task<bool> IsAvailableAsync(Guid roomId, DateTime checkinDate, DateTime checkoutDate, Guid? excludeReservationId = null);
 }

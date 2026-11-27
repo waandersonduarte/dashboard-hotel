@@ -79,6 +79,7 @@ public sealed class CheckoutUseCase : ICheckoutUseCase
         await _checkoutRepository.AddAsync(checkout);
 
         account.Status = StatusAccountEnum.Closed;
+        account.DateClosing = DateTime.UtcNow;
         checkin.Status = StatusCheckinEnum.Completed;
         room!.Status = StatusRoomEnum.Cleaning;
 

@@ -51,7 +51,11 @@ public sealed class ReservationUseCase : IReservationUseCase
         if(room == null)
             throw new NotFoundException("Quarto não encontrado.");
 
-        if(room.Status != StatusRoomEnum.Available)
+        var isAvailable = await _roomRepository.IsAvailableAsync(
+            request.IdRoom,
+            request.CheckinDate,
+            request.CheckoutDate);
+        if(!isAvailable)
             result.Errors.Add(new ValidationFailure(string.Empty, "O quarto informado não está disponível."));
 
         if(!result.IsValid)
@@ -119,17 +123,48 @@ public sealed class ReservationUseCase : IReservationUseCase
         if(reservation.Status == StatusReservationEnum.Canceled || reservation.Status == StatusReservationEnum.Completed)
             throw new ErrorOnValidationException("Reserva cancelada ou finalizada.");
         
-        var room = await _roomRepository.GetByIdRoomAsync(reservation.IdRoom);
-        if(room == null)
-            throw new NotFoundException("Quarto não encontrado.");
-
-        if(room.Status is not (StatusRoomEnum.Available or StatusRoomEnum.Reserved))
-            throw new ErrorOnValidationException("O quarto não está disponível para o período informado.");
+        if (reservation.Status == StatusReservationEnum.CheckedIn)
+            throw new ErrorOnValidationException("Não é possível atualizar uma reserva com check-in realizado.");
+    
         
-        if(request.CheckinDate >= request.CheckoutDate)
+        var newIdRoom = request.IdRoom ?? reservation.IdRoom;
+        var newCheckinDate = request.CheckinDate ?? reservation.CheckinDate;
+        var newCheckoutDate = request.CheckoutDate ?? reservation.CheckoutDate;
+
+        if(newCheckinDate >= newCheckoutDate)
             throw new ErrorOnValidationException("A data de check-in deve ser anterior à data de check-out.");
         
-        request.Adapt(reservation);
+        if (newCheckoutDate <= newCheckinDate)
+            throw new ErrorOnValidationException("A data de checkout deve ser posterior ao check-in.");
+        
+        // Verifica se houve alteração do quarto ou período
+        var hasChanges =
+            newIdRoom != reservation.IdRoom ||
+            newCheckinDate != reservation.CheckinDate ||
+            newCheckoutDate != reservation.CheckoutDate;
+
+        if (hasChanges)
+        {
+            var room = await _roomRepository.GetByIdRoomAsync(newIdRoom);
+
+            if (room == null)
+                throw new NotFoundException("Quarto não encontrado.");
+
+            // Deve verificar conflitos com outras reservas
+            // e estadias, desconsiderando a reserva atual.
+            var isAvailable = await _roomRepository.IsAvailableAsync(
+                newIdRoom,
+                newCheckinDate,
+                newCheckoutDate,
+                id);
+
+            if (!isAvailable)
+                throw new ErrorOnValidationException("O quarto não está disponível para o período informado.");
+        }
+        reservation.IdRoom = newIdRoom;
+        reservation.CheckinDate = newCheckinDate;
+        reservation.CheckoutDate = newCheckoutDate;
+
         await _unitOfWork.CommitAsync();
 
         return reservation.Adapt<ReservationResponse>();
